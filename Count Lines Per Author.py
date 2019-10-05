@@ -3,8 +3,7 @@ from collections import defaultdict
 
 def basic_process(user):
     user_process = subprocess.Popen(f'git log --author="{user}" --pretty=tformat: --shortstat', stdout=subprocess.PIPE, shell = False)
-    total_insertions = 0
-    total_deletions = 0
+    total_insertions = total_deletions = 0
     for line_user in user_process.stdout:
         line = str(line_user)
         insert = insertions.search(line)
