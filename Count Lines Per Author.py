@@ -1,6 +1,7 @@
 from subprocess import Popen, PIPE
 from re import compile
 from collections import defaultdict
+from multiprocessing import Pool
 
 def basic_process(name, email):
     user_process = Popen(f'git log --author="{name}" --pretty=tformat: --shortstat', stdout=PIPE, shell = False)
@@ -45,8 +46,8 @@ def main():
     insertions = compile("(\d+) insertions?\(\+\)")
     deletions = compile("(\d+) deletions?\(\-\)")
 
-    for name, email in get_authors():
-        advanced_process(name, email)
+    with Pool() as pool:
+        pool.starmap(advanced_process, get_authors())
 
 if __name__ == "__main__":
     main()
