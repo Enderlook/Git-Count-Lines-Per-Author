@@ -1,11 +1,6 @@
 import subprocess, re
 from collections import defaultdict
 
-insertions = re.compile("(\d+) insertions?\(\+\)")
-deletions = re.compile("(\d+) deletions?\(\-\)")
-
-main_process = subprocess.Popen("git shortlog -s -n --all", stdout=subprocess.PIPE)
-
 def basic_process(user):
     user_process = subprocess.Popen(f'git log --author="{user}" --pretty=tformat: --shortstat', stdout=subprocess.PIPE, shell = False)
     total_insertions = 0
@@ -35,11 +30,17 @@ def advanced_process(user):
     for k, v in files.items():
         print(f"\t.{k}: + {v['+']} - {v['-']} = {v['+'] - v['-']}")
 
-for line_user in main_process.stdout:
-    line = line_user.rstrip()
-    user = line.split(b"\t")[1].decode("utf-8")
+def get_authors():
+    main_process = subprocess.Popen("git shortlog -s -n --all", stdout=subprocess.PIPE)
+    for line_user in main_process.stdout:
+        line = line_user.rstrip()
+        yield line.split(b"\t")[1].decode()
 
-    advanced_process(user)
+if __name__ == "__main__":
+    insertions = re.compile("(\d+) insertions?\(\+\)")
+    deletions = re.compile("(\d+) deletions?\(\-\)")
+    
+    main_process = subprocess.Popen("git shortlog -s -n --all", stdout=subprocess.PIPE)
 
-
-
+    for author in get_authors():
+        advanced_process(author)
