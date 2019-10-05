@@ -40,7 +40,7 @@ def get_authors():
         line = line_user.rstrip()
         yield line.split(b"\t")[1].decode()
 
-if __name__ == "__main__":
+def main():
     insertions = re.compile("(\d+) insertions?\(\+\)")
     deletions = re.compile("(\d+) deletions?\(\-\)")
     
@@ -48,3 +48,6 @@ if __name__ == "__main__":
 
     for author in get_authors():
         advanced_process(author)
+
+if __name__ == "__main__":
+    main()
