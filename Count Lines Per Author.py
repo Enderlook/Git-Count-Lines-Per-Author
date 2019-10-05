@@ -18,14 +18,19 @@ def basic_process(user):
 def advanced_process(user):
     user_process = subprocess.Popen(f'git log --author="{user}" --pretty=tformat:"%H" --numstat --oneline', stdout=subprocess.PIPE, shell = False)
     files = defaultdict(lambda: defaultdict(int))
+    total_insertions = total_deletions = 0
     for line_user in user_process.stdout:
         line = line_user.decode()
         attributes = line.split("\t");
         if len(attributes) == 3 and (attributes[0] is not "-" or attributes[1] is not "-"):
             extension = attributes[2].split(".")[-1].strip()
-            files[extension]["+"] += int(attributes[0])
-            files[extension]["-"] += int(attributes[1])
-    print(user + ":")
+            insertions = int(attributes[0])
+            files[extension]["+"] += insertions
+            total_insertions += insertions
+            deletions = int(attributes[1])
+            files[extension]["-"] += deletions
+            total_deletions += int(attributes[1])
+    print("{user}: + {total_insertions} - {total_deletions} = {total_insertions - total_deletions}")    
     for k, v in files.items():
         print(f"\t.{k}: + {v['+']} - {v['-']} = {v['+'] - v['-']}")
 
