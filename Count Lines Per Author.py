@@ -1,8 +1,8 @@
 import subprocess, re
 from collections import defaultdict
 
-def basic_process(user):
-    user_process = subprocess.Popen(f'git log --author="{user}" --pretty=tformat: --shortstat', stdout=subprocess.PIPE, shell = False)
+def basic_process(name, email):
+    user_process = subprocess.Popen(f'git log --author="{name}" --pretty=tformat: --shortstat', stdout=subprocess.PIPE, shell = False)
     total_insertions = total_deletions = 0
     for line_user in user_process.stdout:
         line = str(line_user)
@@ -13,10 +13,10 @@ def basic_process(user):
         if delete:
             total_deletions += int(delete.group(1))
     result = total_insertions - total_deletions
-    print(f"{user}: + {total_insertions} - {total_deletions} = {result}")
+    print(f"{name} {email}: + {total_insertions} - {total_deletions} = {result}")
 
-def advanced_process(user):
-    user_process = subprocess.Popen(f'git log --author="{user}" --pretty=tformat:"%H" --numstat --oneline', stdout=subprocess.PIPE, shell = False)
+def advanced_process(name, email):
+    user_process = subprocess.Popen(f'git log --author="{name}" --pretty=tformat:"%H" --numstat --oneline', stdout=subprocess.PIPE, shell = False)
     files = defaultdict(lambda: defaultdict(int))
     total_insertions = total_deletions = 0
     for line_user in user_process.stdout:
@@ -30,24 +30,22 @@ def advanced_process(user):
             deletions = int(attributes[1])
             files[extension]["-"] += deletions
             total_deletions += int(attributes[1])
-    print("{user}: + {total_insertions} - {total_deletions} = {total_insertions - total_deletions}")    
+    print(f"{name} {email}: + {total_insertions} - {total_deletions} = {total_insertions - total_deletions}")    
     for k, v in files.items():
         print(f"\t.{k}: + {v['+']} - {v['-']} = {v['+'] - v['-']}")
 
 def get_authors():
-    main_process = subprocess.Popen("git shortlog -s -n --all", stdout=subprocess.PIPE)
+    main_process = subprocess.Popen("git shortlog -s -n --all -e", stdout=subprocess.PIPE)
     for line_user in main_process.stdout:
-        line = line_user.rstrip()
-        yield line.split(b"\t")[1].decode()
+        line = line_user.rstrip().decode()
+        yield line.split("\t")[1].rsplit(" ", 1)
 
 def main():
     insertions = re.compile("(\d+) insertions?\(\+\)")
     deletions = re.compile("(\d+) deletions?\(\-\)")
-    
-    main_process = subprocess.Popen("git shortlog -s -n --all", stdout=subprocess.PIPE)
 
-    for author in get_authors():
-        advanced_process(author)
+    for name, email in get_authors():
+        advanced_process(name, email)
 
 if __name__ == "__main__":
     main()
