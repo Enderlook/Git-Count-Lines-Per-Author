@@ -24,7 +24,7 @@ def advanced_process(name, email):
     for line_user in user_process.stdout:
         line = line_user.decode()
         attributes = line.split("\t");
-        if len(attributes) == 3 and (attributes[0] is not "-" or attributes[1] is not "-"):
+        if len(attributes) == 3 and (attributes[0] != "-" or attributes[1] != "-"):
             extension = attributes[2].split(".")[-1].split("/")[-1]
             extension = extension.split("=>")[-1].replace("}", "").strip()
             insertions = int(attributes[0])
